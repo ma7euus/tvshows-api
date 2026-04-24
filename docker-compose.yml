@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cmanager-php:latest
+    container_name: cmanager-app
+    ports:
+      - "9012:9012"
+    environment:
+      APP_ENV: local
+    depends_on:
+      - postgres
+    restart: always
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: cmanager-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: tvshow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
