@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Models\User;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
- * @OA\Tag(name="AuthController", description="API de controle autenticações")
+ * @OA\Tag(name="Auth", description="API de controle autenticações")
  */
 class AuthController extends Controller
 {
@@ -15,7 +16,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/api/auth/login",
      *     summary="Login de um usuário",
-     *     tags={"AuthController"},
+     *     tags={"Auth"},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/LoginRequest")
@@ -33,22 +34,16 @@ class AuthController extends Controller
             'password' => $request->input('password'),
         ];
 
-        $user = \App\Models\User::where('username', $credentials['username'])->first();
+        $user = User::query()
+            ->where('username', $credentials['username'])
+            ->first();
 
         if (!$user || !$user->enabled) {
-            return response()->json([
-                'message' => 'Bad credentials',
-                'status' => 401,
-                'error' => 'Unauthorized',
-            ], 401);
+            throw new AuthenticationException('Bad credentials.');
         }
 
         if (!$token = auth('api')->attempt($credentials)) {
-            return response()->json([
-                'message' => 'Bad credentials',
-                'status' => 401,
-                'error' => 'Unauthorized',
-            ], 401);
+            throw new AuthenticationException('Bad credentials.');
         }
 
         return response()->json(['token' => $token]);

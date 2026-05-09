@@ -10,8 +10,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Cria o enum type no PostgreSQL
-        DB::statement("CREATE TYPE role_enum AS ENUM ('ADMIN', 'USER')");
+        DB::statement(<<<'SQL'
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'role_enum') THEN
+                    CREATE TYPE role_enum AS ENUM ('ADMIN', 'USER');
+                END IF;
+            END
+            $$;
+        SQL);
 
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -21,49 +23,103 @@ class Handler extends ExceptionHandler
     {
         $this->renderable(function (ValidationException $e, $request) {
             if ($request->expectsJson()) {
-                return response()->json($e->errors(), 400);
+                return $this->errorResponse(
+                    message: 'Validation failed.',
+                    path: $request->path(),
+                    status: 422,
+                    error: 'Unprocessable Entity',
+                    details: ['errors' => $e->errors()],
+                );
             }
+            return redirect()->back()->withInput()->withErrors($e->errors());
         });
 
         $this->renderable(function (ModelNotFoundException $e, $request) {
             if ($request->expectsJson()) {
-                return $this->errorResponse($e->getMessage(), $request->path(), 404, 'Not Found');
+                return $this->errorResponse(
+                    $this->formatModelNotFoundMessage($e),
+                    $request->path(),
+                    404,
+                    'Not Found',
+                );
             }
+            return redirect()->back()->withInput()->withErrors(['message' => $this->formatModelNotFoundMessage($e)]);
         });
 
         $this->renderable(function (AuthorizationException $e, $request) {
             if ($request->expectsJson()) {
                 return $this->errorResponse($e->getMessage(), $request->path(), 403, 'Forbidden');
             }
+            return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
         });
 
         $this->renderable(function (AlreadyExistsException $e, $request) {
             if ($request->expectsJson()) {
                 return $this->errorResponse($e->getMessage(), $request->path(), 409, 'Conflict');
             }
+            return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
         });
 
         $this->renderable(function (AuthenticationException $e, $request) {
             if ($request->expectsJson()) {
                 return $this->errorResponse($e->getMessage(), $request->path(), 401, 'Unauthorized');
             }
+            return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
+        });
+
+        $this->renderable(function (HttpExceptionInterface $e, $request) {
+            if ($request->expectsJson()) {
+                $status = $e->getStatusCode();
+
+                return $this->errorResponse(
+                    $e->getMessage() !== '' ? $e->getMessage() : (Response::$statusTexts[$status] ?? 'Error'),
+                    $request->path(),
+                    $status,
+                    Response::$statusTexts[$status] ?? 'Error',
+                );
+            }
+            return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
         });
 
         $this->renderable(function (Throwable $e, $request) {
             if ($request->expectsJson()) {
-                return $this->errorResponse($e->getMessage(), $request->path(), 400, 'Bad Request');
+                return $this->errorResponse(
+                    config('app.debug') ? $e->getMessage() : 'Internal Server Error',
+                    $request->path(),
+                    500,
+                    'Internal Server Error',
+                );
             }
+            return redirect()->back()->withInput()->withErrors(['message' => 'Internal Server Error']);
         });
     }
 
-    private function errorResponse(string $message, string $path, int $status, string $error): JsonResponse
+    private function errorResponse(
+        string $message,
+        string $path,
+        int $status,
+        string $error,
+        array $details = [],
+    ): JsonResponse
     {
         return response()->json([
             'message' => $message,
-            'path' => '/' . $path,
+            'path' => '/' . ltrim($path, '/'),
             'status' => $status,
             'error' => $error,
+            ...$details,
             'timestamp' => now()->toIso8601String(),
         ], $status);
+    }
+
+    private function formatModelNotFoundMessage(ModelNotFoundException $exception): string
+    {
+        $model = $exception->getModel();
+
+        if (!$model) {
+            return 'Resource not found.';
+        }
+
+        return sprintf('%s not found.', class_basename($model));
     }
 }
