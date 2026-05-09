@@ -1,39 +1,54 @@
-# Avaliação Desenvolvedor Backend PHP
-
-## Objetivo:
-Avaliar a capacidade do desenvolvedor em construir e evoluir uma API REST robusta, utilizando
-PHP (versão estável mais recente), Laravel, banco de dados PostgreSQL, integrações externas,
-boas práticas de arquitetura, organização de código, segurança, Docker e documentação
-
-## Requisitos técnicos:
-
-- PHP 8.3
-- Laravel 12
-- Docker
-- PostgreSQL 16.X
-- Migrations (Laravel)
-- JWT Auth (tymon/jwt-auth)
-- Arquitetura em camadas
-- Guzzle HTTP Client
-- Tratamento de erros padronizado
-- Documentação via L5-Swagger (OpenAPI)
-
-## Estrutura disponibilizada
-
-- Camada de segurança parcialmente pronta (Middlewares JWT e Role)
-- DTOs da API externa (Integration/DTO)
-- User (Controller, Service, Model)
-- Migrations com tabelas users e shows
-- Classe de paginação (PaginationHelper)
-- Classe modelo para chamadas externas (AbstractRequest)
-
 ## Como executar
 
 ```bash
-docker-compose up --build
+./docker/init.sh
 ```
 
 A aplicação estará disponível em `http://localhost:9012`
+
+Na primeira subida o container da aplicação faz automaticamente:
+
+- criação do `.env` a partir do `.env.example`, se necessário;
+- ajuste automático de `DOCKER_UID` e `DOCKER_GID` no `.env`;
+- `composer install`;
+- geração de `APP_KEY`;
+- geração de `JWT_SECRET`;
+- espera do PostgreSQL;
+- execução de `php artisan migrate --force`;
+- geração do Swagger.
+
+## Fluxo mínimo:
+
+```bash
+./docker/init.sh
+docker compose logs -f app
+```
+
+Quando o healthcheck do serviço `app` estiver `healthy`, o ambiente está pronto.
+Depois da primeira inicialização, `docker compose up -d` volta a funcionar normalmente com o `.env` já preparado.
+
+## Comandos úteis
+
+```bash
+docker compose exec app php artisan test
+docker compose exec app php artisan migrate:fresh --seed
+docker compose exec app composer install
+docker compose down
+docker compose down -v
+```
+
+Se você precisar forçar outro UID/GID, ajuste `DOCKER_UID` e `DOCKER_GID` no `.env`.
+
+## Usuários padrão
+
+- `admin` / `admin` (`ADMIN`)
+- `user` / `user` (`USER`)
+
+## Testes
+
+```bash
+docker compose exec app php artisan test
+```
 
 ## Swagger
 

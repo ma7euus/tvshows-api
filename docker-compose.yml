@@ -1,31 +1,80 @@
-version: "3.9"
-
 services:
   app:
+    container_name: tvshow-api-app
     build:
       context: .
       dockerfile: Dockerfile
-    image: cmanager-php:latest
-    container_name: cmanager-app
+      args:
+        DOCKER_UID: ${DOCKER_UID:-1000}
+        DOCKER_GID: ${DOCKER_GID:-1000}
+    working_dir: /app
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+    init: true
     ports:
-      - "9012:9012"
+      - "${APP_PORT:-9012}:8000"
+    volumes:
+      - ./:/app
+      - tvshow-composer-cache:/tmp/composer/cache
     environment:
-      APP_ENV: local
+      RUN_COMPOSER_INSTALL: ${RUN_COMPOSER_INSTALL:-true}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      GENERATE_SWAGGER: ${GENERATE_SWAGGER:-true}
+      DB_WAIT_RETRIES: ${DB_WAIT_RETRIES:-30}
     depends_on:
-      - postgres
-    restart: always
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8000/up') === false ? 1 : 0);"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+
+  queue:
+    container_name: tvshow-api-queue
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DOCKER_UID: ${DOCKER_UID:-1000}
+        DOCKER_GID: ${DOCKER_GID:-1000}
+    working_dir: /app
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+    init: true
+    command: ["php", "artisan", "queue:work", "--queue=default", "--tries=1", "--sleep=1", "--timeout=0"]
+    volumes:
+      - ./:/app
+      - tvshow-composer-cache:/tmp/composer/cache
+    environment:
+      RUN_COMPOSER_INSTALL: ${RUN_COMPOSER_INSTALL:-true}
+      RUN_MIGRATIONS: "false"
+      GENERATE_SWAGGER: "false"
+      DB_WAIT_RETRIES: ${DB_WAIT_RETRIES:-30}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
   postgres:
+    container_name: tvshow-api-db
     image: postgres:16-alpine
-    container_name: cmanager-postgres
     ports:
-      - "5433:5432"
+      - "${DB_FORWARD_PORT:-5433}:5432"
     environment:
-      POSTGRES_DB: tvshow
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-tvshow}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - tvshow-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-tvshow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
 
 volumes:
-  pgdata:
+  tvshow-composer-cache:
+  tvshow-db-data:
