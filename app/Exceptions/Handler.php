@@ -31,6 +31,7 @@ class Handler extends ExceptionHandler
                     details: ['errors' => $e->errors()],
                 );
             }
+            return redirect()->back()->withInput()->withErrors($e->errors());
         });
 
         $this->renderable(function (ModelNotFoundException $e, $request) {
@@ -42,24 +43,28 @@ class Handler extends ExceptionHandler
                     'Not Found',
                 );
             }
+            return redirect()->back()->withInput()->withErrors(['message' => $this->formatModelNotFoundMessage($e)]);
         });
 
         $this->renderable(function (AuthorizationException $e, $request) {
             if ($request->expectsJson()) {
                 return $this->errorResponse($e->getMessage(), $request->path(), 403, 'Forbidden');
             }
+            return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
         });
 
         $this->renderable(function (AlreadyExistsException $e, $request) {
             if ($request->expectsJson()) {
                 return $this->errorResponse($e->getMessage(), $request->path(), 409, 'Conflict');
             }
+            return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
         });
 
         $this->renderable(function (AuthenticationException $e, $request) {
             if ($request->expectsJson()) {
                 return $this->errorResponse($e->getMessage(), $request->path(), 401, 'Unauthorized');
             }
+            return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
         });
 
         $this->renderable(function (HttpExceptionInterface $e, $request) {
@@ -73,6 +78,7 @@ class Handler extends ExceptionHandler
                     Response::$statusTexts[$status] ?? 'Error',
                 );
             }
+            return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
         });
 
         $this->renderable(function (Throwable $e, $request) {
@@ -84,6 +90,7 @@ class Handler extends ExceptionHandler
                     'Internal Server Error',
                 );
             }
+            return redirect()->back()->withInput()->withErrors(['message' => 'Internal Server Error']);
         });
     }
 
