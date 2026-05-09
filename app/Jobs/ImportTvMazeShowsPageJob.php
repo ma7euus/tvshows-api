@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
-use App\Application\Shows\UseCases\SyncExternalShowUseCase;
-use App\Domain\Shows\Contracts\ShowCatalogInterface;
 use App\Enums\TvMazeImportStatus;
-use App\Integration\Exceptions\TransientTvMazeException;
 use App\Models\TvMazeImport;
+use App\Modules\Shows\Application\Shows\UseCases\SyncExternalShowUseCase;
+use App\Modules\Shows\Domain\Shows\Contracts\ShowCatalogInterface;
+use App\Modules\Shows\Infrastructure\Integration\Exceptions\TransientTvMazeException;
 use DateTimeInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;

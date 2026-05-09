@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shows;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TvMazeImportResource;
+use App\Models\TvMazeImport;
 use App\Modules\Shows\Application\Shows\UseCases\SchedulePaginatedShowImportUseCase;
 use Illuminate\Http\JsonResponse;
 

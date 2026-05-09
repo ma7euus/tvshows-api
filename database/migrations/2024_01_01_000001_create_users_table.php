@@ -10,15 +10,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Cria o enum type no PostgreSQL de forma idempotente para suportar reruns após falha.
         DB::statement(<<<'SQL'
             DO $$
             BEGIN
-                IF NOT EXISTS (
-                    SELECT 1
-                    FROM pg_type
-                    WHERE typname = 'role_enum'
-                ) THEN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'role_enum') THEN
                     CREATE TYPE role_enum AS ENUM ('ADMIN', 'USER');
                 END IF;
             END
@@ -42,7 +37,7 @@ return new class extends Migration
             'id' => '08b5a3a9-8874-4fd7-b79a-45c877a65f6e',
             'username' => 'admin',
             'password' => Hash::make('admin'),
-            'role' => \App\Enums\Role::ADMIN->toStr(),
+            'role' => 'ADMIN',
             'enabled' => true,
             'created_at' => now(),
             'updated_at' => now(),

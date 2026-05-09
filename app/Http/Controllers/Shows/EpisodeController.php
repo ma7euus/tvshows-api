@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shows;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Shows\EpisodeAverageRequest;
 use App\Http\Resources\Shows\ShowAverageResource;
+use App\Modules\Shows\Application\Shows\UseCases\GetShowSeasonAveragesUseCase;
 use Illuminate\Http\JsonResponse;
 
 /**

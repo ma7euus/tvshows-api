@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Domain\Security\Contracts\RoleAuthorizerInterface;
+use App\Modules\Shared\Domain\Security\Contracts\RoleAuthorizerInterface;
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
