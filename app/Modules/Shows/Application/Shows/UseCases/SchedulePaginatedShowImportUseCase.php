@@ -17,7 +17,9 @@ final class SchedulePaginatedShowImportUseCase
             ->first();
 
         if ($activeImport !== null) {
-            throw new ConflictHttpException('A TVMaze paginated import is already in progress.');
+            throw new ConflictHttpException(
+                sprintf("Importation is already in progress. ID: %s", $activeImport->id)
+            );
         }
 
         $import = TvMazeImport::query()->create([
