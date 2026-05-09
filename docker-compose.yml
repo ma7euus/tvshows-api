@@ -31,30 +31,30 @@ services:
       start_period: 120s
     restart: unless-stopped
 
-#  queue:
-#    container_name: tvshow-api-queue
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#      args:
-#        DOCKER_UID: ${DOCKER_UID:-1000}
-#        DOCKER_GID: ${DOCKER_GID:-1000}
-#    working_dir: /app
-#    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
-#    init: true
-#    command: ["php", "artisan", "queue:work", "--queue=default", "--tries=1", "--sleep=1", "--timeout=0"]
-#    volumes:
-#      - ./:/app
-#      - tvshow-composer-cache:/tmp/composer/cache
-#    environment:
-#      RUN_COMPOSER_INSTALL: ${RUN_COMPOSER_INSTALL:-true}
-#      RUN_MIGRATIONS: "false"
-#      GENERATE_SWAGGER: "false"
-#      DB_WAIT_RETRIES: ${DB_WAIT_RETRIES:-30}
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#    restart: unless-stopped
+  queue:
+    container_name: tvshow-api-queue
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DOCKER_UID: ${DOCKER_UID:-1000}
+        DOCKER_GID: ${DOCKER_GID:-1000}
+    working_dir: /app
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+    init: true
+    command: ["php", "artisan", "queue:work", "--queue=default", "--tries=1", "--sleep=1", "--timeout=0"]
+    volumes:
+      - ./:/app
+      - tvshow-composer-cache:/tmp/composer/cache
+    environment:
+      RUN_COMPOSER_INSTALL: ${RUN_COMPOSER_INSTALL:-true}
+      RUN_MIGRATIONS: "false"
+      GENERATE_SWAGGER: "false"
+      DB_WAIT_RETRIES: ${DB_WAIT_RETRIES:-30}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
   postgres:
     container_name: tvshow-api-db

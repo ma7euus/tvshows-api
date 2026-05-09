@@ -50,6 +50,9 @@ Se você precisar forçar outro UID/GID, ajuste `DOCKER_UID` e `DOCKER_GID` no `
 docker compose exec app php artisan test
 ```
 
+Os testes usam um banco PostgreSQL dedicado, `tvshow_test`, separado do banco principal `tvshow`.
+O bootstrap de testes garante a criacao desse banco antes de executar `migrate:fresh`.
+
 ## Swagger
 
 Acesse `http://localhost:9012/api/documentation` após iniciar a aplicação.

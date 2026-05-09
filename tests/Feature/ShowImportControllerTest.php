@@ -108,7 +108,7 @@ class ShowImportControllerTest extends TestCase
     {
         Queue::fake();
 
-        TvMazeImport::query()->create([
+        $activeImport = TvMazeImport::query()->create([
             'status' => TvMazeImportStatus::RUNNING,
             'started_at' => now(),
         ]);
@@ -117,7 +117,7 @@ class ShowImportControllerTest extends TestCase
             ->postJson('/api/shows/imports/paginated');
 
         $response->assertStatus(409)
-            ->assertJsonPath('message', 'A TVMaze paginated import is already in progress.');
+            ->assertJsonPath('message',  sprintf("Importation is already in progress. ID: %s", $activeImport->id));
 
         Queue::assertNothingPushed();
     }
