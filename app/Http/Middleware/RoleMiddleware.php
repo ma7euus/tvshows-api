@@ -21,7 +21,6 @@ class RoleMiddleware
         if (!$user) {
             throw new AuthenticationException('Unauthorized.');
         }
-
         if ($this->roleAuthorizer->hasAnyRole($user, $roles)) {
             return $next($request);
         }

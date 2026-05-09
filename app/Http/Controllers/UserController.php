@@ -33,7 +33,19 @@ class UserController extends Controller
      *     @OA\Parameter(name="size", in="query", required=false, description="Quantidade de registros por página"),
      *     @OA\Parameter(name="sortField", in="query", required=false, description="Campo para ordenação"),
      *     @OA\Parameter(name="sortOrder", in="query", required=false, description="Direção da ordenação (ASC ou DESC)"),
-     *     @OA\Response(response=200, description="Listagem realizada com sucesso")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Listagem realizada com sucesso",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="content", type="array", @OA\Items(ref="#/components/schemas/UserDTO")),
+     *             @OA\Property(property="page", type="integer"),
+     *             @OA\Property(property="size", type="integer"),
+     *             @OA\Property(property="totalElements", type="integer"),
+     *             @OA\Property(property="totalPages", type="integer"),
+     *             @OA\Property(property="last", type="boolean")
+     *         )
+     *     )
      * )
      */
     public function index(UserListRequest $request): JsonResponse
@@ -58,7 +70,11 @@ class UserController extends Controller
      *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, description="ID do usuário"),
-     *     @OA\Response(response=200, description="Consulta realizada com sucesso"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Consulta realizada com sucesso",
+     *         @OA\JsonContent(ref="#/components/schemas/UserDTO")
+     *     ),
      *     @OA\Response(response=404, description="Usuário não encontrado")
      * )
      */
@@ -75,7 +91,11 @@ class UserController extends Controller
      *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/UserCreateRequest")),
-     *     @OA\Response(response=201, description="Usuário cadastrado com sucesso"),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Usuário cadastrado com sucesso",
+     *         @OA\JsonContent(ref="#/components/schemas/UserDTO")
+     *     ),
      *     @OA\Response(response=409, description="Username já existe")
      * )
      */
@@ -94,7 +114,11 @@ class UserController extends Controller
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, description="ID do usuário"),
      *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/UserUpdateRequest")),
-     *     @OA\Response(response=200, description="Usuário atualizado com sucesso")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Usuário atualizado com sucesso",
+     *         @OA\JsonContent(ref="#/components/schemas/UserDTO")
+     *     )
      * )
      */
     public function update(UserUpdateRequest $request, string $id): JsonResponse

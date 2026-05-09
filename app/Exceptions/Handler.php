@@ -22,7 +22,7 @@ class Handler extends ExceptionHandler
     public function register(): void
     {
         $this->renderable(function (ValidationException $e, $request) {
-            if ($request->expectsJson()) {
+            if ($this->shouldReturnJson($request, $e)) {
                 return $this->errorResponse(
                     message: 'Validation failed.',
                     path: $request->path(),
@@ -35,7 +35,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (ModelNotFoundException $e, $request) {
-            if ($request->expectsJson()) {
+            if ($this->shouldReturnJson($request, $e)) {
                 return $this->errorResponse(
                     $this->formatModelNotFoundMessage($e),
                     $request->path(),
@@ -47,28 +47,28 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (AuthorizationException $e, $request) {
-            if ($request->expectsJson()) {
+            if ($this->shouldReturnJson($request, $e)) {
                 return $this->errorResponse($e->getMessage(), $request->path(), 403, 'Forbidden');
             }
             return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
         });
 
         $this->renderable(function (AlreadyExistsException $e, $request) {
-            if ($request->expectsJson()) {
+            if ($this->shouldReturnJson($request, $e)) {
                 return $this->errorResponse($e->getMessage(), $request->path(), 409, 'Conflict');
             }
             return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
         });
 
         $this->renderable(function (AuthenticationException $e, $request) {
-            if ($request->expectsJson()) {
+            if ($this->shouldReturnJson($request, $e)) {
                 return $this->errorResponse($e->getMessage(), $request->path(), 401, 'Unauthorized');
             }
             return redirect()->back()->withInput()->withErrors(['message' => $e->getMessage()]);
         });
 
         $this->renderable(function (HttpExceptionInterface $e, $request) {
-            if ($request->expectsJson()) {
+            if ($this->shouldReturnJson($request, $e)) {
                 $status = $e->getStatusCode();
 
                 return $this->errorResponse(
@@ -82,7 +82,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (Throwable $e, $request) {
-            if ($request->expectsJson()) {
+            if ($this->shouldReturnJson($request, $e)) {
                 return $this->errorResponse(
                     config('app.debug') ? $e->getMessage() : 'Internal Server Error',
                     $request->path(),
@@ -121,5 +121,10 @@ class Handler extends ExceptionHandler
         }
 
         return sprintf('%s not found.', class_basename($model));
+    }
+
+    protected function shouldReturnJson($request, Throwable $e): bool
+    {
+        return parent::shouldReturnJson($request, $e) || $request->is('api/*');
     }
 }

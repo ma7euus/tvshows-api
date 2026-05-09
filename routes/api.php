@@ -37,7 +37,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | Importação assincrona de shows
+        | Importação assíncrona de shows
         |--------------------------------------------------------------------------
         */
         Route::post('/shows/imports/paginated', [ShowImportController::class, 'store'])
