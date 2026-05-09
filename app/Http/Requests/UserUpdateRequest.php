@@ -10,7 +10,6 @@ use Illuminate\Validation\Rule;
  * @OA\Schema(
  *     schema="UserUpdateRequest",
  *     description="Payload para atualização de um usuário",
- *     required={"username", "password", "role", "enabled"},
  *     @OA\Property(property="username", type="string", minLength=3, maxLength=100, description="Login para acesso"),
  *     @OA\Property(property="password", type="string", minLength=6, maxLength=200, description="Senha para acesso"),
  *     @OA\Property(property="role", type="string", enum={"ADMIN", "USER"}, description="Permissões"),
@@ -27,10 +26,10 @@ class UserUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string|min:3|max:100',
-            'password' => 'required|string|min:6|max:200',
-            'role' => ['required', Rule::enum(Role::class)],
-            'enabled' => 'required|boolean',
+            'username' => 'sometimes|string|min:3|max:100',
+            'password' => 'sometimes|string|min:6|max:200',
+            'role' => ['sometimes', Rule::enum(Role::class)],
+            'enabled' => 'sometimes|boolean',
         ];
     }
 }
