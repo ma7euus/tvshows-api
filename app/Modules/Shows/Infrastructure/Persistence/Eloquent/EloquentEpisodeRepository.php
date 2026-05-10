@@ -7,6 +7,7 @@ use App\Models\Show;
 use App\Modules\Shared\Infrastructure\Persistence\Support\PersistenceValueNormalizer;
 use App\Modules\Shows\Application\Shows\DTO\SeasonAverageDTO;
 use App\Modules\Shows\Domain\Shows\Contracts\Repositories\EpisodeRepositoryInterface;
+use Illuminate\Support\Collection;
 
 final class EloquentEpisodeRepository implements EpisodeRepositoryInterface
 {
@@ -74,5 +75,14 @@ final class EloquentEpisodeRepository implements EpisodeRepositoryInterface
                 averageRating: round((float) $average->average_rating, 2),
             ))
             ->all();
+    }
+
+    public function getEpisodesByShow(string $showId): array
+    {
+        return Episode::query()
+            ->where('show_id', $showId)
+            ->orderBy('season', 'desc')
+            ->orderBy('number', 'desc')
+            ->get()->all();
     }
 }

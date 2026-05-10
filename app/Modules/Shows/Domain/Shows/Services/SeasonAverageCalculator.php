@@ -5,7 +5,7 @@ namespace App\Modules\Shows\Domain\Shows\Services;
 use App\Modules\Shows\Domain\Shows\DTO\EpisodeRatingDTO;
 use App\Modules\Shows\Domain\Shows\DTO\SeasonAverageDTO;
 
-final class SeasonAverageCalculator
+class SeasonAverageCalculator
 {
     /**
      * @param EpisodeRatingDTO[] $episodeRatings
