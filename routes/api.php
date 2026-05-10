@@ -40,8 +40,11 @@ Route::middleware(['jwt.auth'])->group(function () {
         | Importação assíncrona de shows
         |--------------------------------------------------------------------------
         */
-        Route::post('/shows/imports/paginated', [ShowImportController::class, 'store']);
-        Route::get('/shows/imports/{import}', [ShowImportController::class, 'show']);
-        Route::post('/shows/imports/{import}/resume', [ShowImportController::class, 'resume']);
+        Route::post('/shows/imports/paginated', [ShowImportController::class, 'store'])
+            ->name('shows.imports.store');
+        Route::get('/shows/imports/{import}', [ShowImportController::class, 'show'])
+            ->name('shows.imports.show');
+        Route::post('/shows/imports/{import}/resume', [ShowImportController::class, 'resume'])
+            ->name('shows.imports.resume');
     });
 });

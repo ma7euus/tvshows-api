@@ -24,8 +24,8 @@ RUN groupadd --gid "${DOCKER_GID}" app \
 
 WORKDIR /app
 
-COPY --chown=app:app . /app
-COPY --chown=app:app docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --chown=app:app ../.. /app
+COPY --chown=app:app .docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
     && mkdir -p \

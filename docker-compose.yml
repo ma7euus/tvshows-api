@@ -3,7 +3,7 @@ services:
     container_name: tvshow-api-app
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: .docker/app/Dockerfile
       args:
         DOCKER_UID: ${DOCKER_UID:-1000}
         DOCKER_GID: ${DOCKER_GID:-1000}
@@ -35,7 +35,7 @@ services:
     container_name: tvshow-api-queue
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: .docker/app/Dockerfile
       args:
         DOCKER_UID: ${DOCKER_UID:-1000}
         DOCKER_GID: ${DOCKER_GID:-1000}
