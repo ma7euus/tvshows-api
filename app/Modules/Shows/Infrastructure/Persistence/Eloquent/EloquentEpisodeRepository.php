@@ -7,13 +7,15 @@ use App\Models\Show;
 use App\Modules\Shared\Infrastructure\Persistence\Support\PersistenceValueNormalizer;
 use App\Modules\Shows\Application\Shows\DTO\SeasonAverageDTO;
 use App\Modules\Shows\Domain\Shows\Contracts\Repositories\EpisodeRepositoryInterface;
-use Illuminate\Support\Collection;
 
-final class EloquentEpisodeRepository implements EpisodeRepositoryInterface
+class EloquentEpisodeRepository implements EpisodeRepositoryInterface
 {
     public function __construct(
-        private readonly PersistenceValueNormalizer $valueNormalizer,
-    ) {}
+        protected Episode                             $episodeModel,
+        protected readonly PersistenceValueNormalizer $valueNormalizer,
+    )
+    {
+    }
 
     public function syncForShow(Show $show, array $episodes): void
     {
@@ -22,7 +24,7 @@ final class EloquentEpisodeRepository implements EpisodeRepositoryInterface
         foreach ($episodes as $episodeData) {
             $integrationIds[] = $episodeData->integrationId;
 
-            Episode::query()->updateOrCreate(
+            $this->episodeModel->newInstance()->updateOrCreate(
                 ['id_integration' => $episodeData->integrationId],
                 [
                     'show_id' => $show->id,
@@ -41,14 +43,14 @@ final class EloquentEpisodeRepository implements EpisodeRepositoryInterface
         }
 
         if ($integrationIds === []) {
-            Episode::query()
+            $this->episodeModel->newInstance()
                 ->where('show_id', $show->id)
                 ->delete();
 
             return;
         }
 
-        Episode::query()
+        $this->episodeModel->newInstance()
             ->where('show_id', $show->id)
             ->whereNotIn('id_integration', $integrationIds)
             ->delete();
@@ -56,30 +58,30 @@ final class EloquentEpisodeRepository implements EpisodeRepositoryInterface
 
     public function hasEpisodesForShow(string $showId): bool
     {
-        return Episode::query()
+        return $this->episodeModel->newInstance()
             ->where('show_id', $showId)
             ->exists();
     }
 
     public function getSeasonAveragesByShow(string $showId): array
     {
-        return Episode::query()
+        return $this->episodeModel->newInstance()
             ->selectRaw('season, COALESCE(AVG(rating), 0) as average_rating')
             ->where('show_id', $showId)
             ->whereNotNull('season')
             ->groupBy('season')
             ->orderBy('season')
             ->get()
-                ->map(fn ($average) => new SeasonAverageDTO(
-                season: (int) $average->season,
-                averageRating: round((float) $average->average_rating, 2),
+            ->map(fn($average) => new SeasonAverageDTO(
+                season: (int)$average->season,
+                averageRating: round((float)$average->average_rating, 2),
             ))
             ->all();
     }
 
     public function getEpisodesByShow(string $showId): array
     {
-        return Episode::query()
+        return $this->episodeModel->newInstance()
             ->where('show_id', $showId)
             ->orderBy('season', 'desc')
             ->orderBy('number', 'desc')

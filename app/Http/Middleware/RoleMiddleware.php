@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class RoleMiddleware
 {
     public function __construct(
-        private readonly RoleAuthorizerInterface $roleAuthorizer,
+        protected readonly RoleAuthorizerInterface $roleAuthorizer,
     ) {}
 
     public function handle(Request $request, Closure $next, string ...$roles)

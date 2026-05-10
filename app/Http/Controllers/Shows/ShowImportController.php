@@ -15,7 +15,7 @@ use Illuminate\Http\JsonResponse;
 class ShowImportController extends Controller
 {
     public function __construct(
-        private readonly SchedulePaginatedShowImportUseCase $schedulePaginatedShowImportUseCase,
+        protected readonly SchedulePaginatedShowImportUseCase $schedulePaginatedShowImportUseCase,
     ) {}
 
     /**
