@@ -3,11 +3,12 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class JwtMiddleware
 {
@@ -15,31 +16,16 @@ class JwtMiddleware
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
+
             if (!$user || !$user->enabled) {
-                return response()->json([
-                    'message' => 'User not found or disabled',
-                    'status' => 401,
-                    'error' => 'Unauthorized',
-                ], 401);
+                throw new AuthenticationException('User not found or disabled.');
             }
         } catch (TokenExpiredException $e) {
-            return response()->json([
-                'message' => 'Token expired',
-                'status' => 401,
-                'error' => 'Unauthorized',
-            ], 401);
+            throw new AuthenticationException('Token expired.');
         } catch (TokenInvalidException $e) {
-            return response()->json([
-                'message' => 'Token invalid',
-                'status' => 401,
-                'error' => 'Unauthorized',
-            ], 401);
+            throw new AuthenticationException('Token invalid.');
         } catch (JWTException $e) {
-            return response()->json([
-                'message' => 'Token not provided',
-                'status' => 401,
-                'error' => 'Unauthorized',
-            ], 401);
+            throw new AuthenticationException('Token not provided');
         }
 
         return $next($request);

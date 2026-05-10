@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\PaginationHelper;
+use App\Http\Requests\UserListRequest;
 use App\Http\Requests\UserCreateRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserResource;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 /**
- * @OA\Tag(name="UserController", description="API de gerenciamento de usuários")
+ * @OA\Tag(name="User", description="API de gerenciamento de usuários")
  */
 class UserController extends Controller
 {
@@ -26,19 +26,30 @@ class UserController extends Controller
      * @OA\Get(
      *     path="/api/users",
      *     summary="Lista usuários com paginação",
-     *     tags={"UserController"},
+     *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="username", in="query", required=false, description="Nome do usuário para filtro"),
      *     @OA\Parameter(name="page", in="query", required=false, description="Número da página (inicia em 0)"),
      *     @OA\Parameter(name="size", in="query", required=false, description="Quantidade de registros por página"),
      *     @OA\Parameter(name="sortField", in="query", required=false, description="Campo para ordenação"),
      *     @OA\Parameter(name="sortOrder", in="query", required=false, description="Direção da ordenação (ASC ou DESC)"),
-     *     @OA\Response(response=200, description="Listagem realizada com sucesso")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Listagem realizada com sucesso",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="content", type="array", @OA\Items(ref="#/components/schemas/UserDTO")),
+     *             @OA\Property(property="page", type="integer"),
+     *             @OA\Property(property="size", type="integer"),
+     *             @OA\Property(property="totalElements", type="integer"),
+     *             @OA\Property(property="totalPages", type="integer"),
+     *             @OA\Property(property="last", type="boolean")
+     *         )
+     *     )
      * )
      */
-    public function index(Request $request): JsonResponse
+    public function index(UserListRequest $request): JsonResponse
     {
-        // BUG INTENCIONAL: Não verifica se o usuário é ADMIN
         $username = $request->query('username', '');
         $page = (int) $request->query('page', 0);
         $size = (int) $request->query('size', 10);
@@ -56,10 +67,14 @@ class UserController extends Controller
      * @OA\Get(
      *     path="/api/users/{id}",
      *     summary="Consulta um usuário pelo id",
-     *     tags={"UserController"},
+     *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, description="ID do usuário"),
-     *     @OA\Response(response=200, description="Consulta realizada com sucesso"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Consulta realizada com sucesso",
+     *         @OA\JsonContent(ref="#/components/schemas/UserDTO")
+     *     ),
      *     @OA\Response(response=404, description="Usuário não encontrado")
      * )
      */
@@ -73,10 +88,14 @@ class UserController extends Controller
      * @OA\Post(
      *     path="/api/users",
      *     summary="Registra um usuário",
-     *     tags={"UserController"},
+     *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/UserCreateRequest")),
-     *     @OA\Response(response=201, description="Usuário cadastrado com sucesso"),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Usuário cadastrado com sucesso",
+     *         @OA\JsonContent(ref="#/components/schemas/UserDTO")
+     *     ),
      *     @OA\Response(response=409, description="Username já existe")
      * )
      */
@@ -91,11 +110,15 @@ class UserController extends Controller
      * @OA\Put(
      *     path="/api/users/{id}",
      *     summary="Atualiza um usuário",
-     *     tags={"UserController"},
+     *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, description="ID do usuário"),
      *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/UserUpdateRequest")),
-     *     @OA\Response(response=200, description="Usuário atualizado com sucesso")
+     *     @OA\Response(
+     *         response=200,
+     *         description="Usuário atualizado com sucesso",
+     *         @OA\JsonContent(ref="#/components/schemas/UserDTO")
+     *     )
      * )
      */
     public function update(UserUpdateRequest $request, string $id): JsonResponse
@@ -108,7 +131,7 @@ class UserController extends Controller
      * @OA\Delete(
      *     path="/api/users/{id}",
      *     summary="Remove um usuário",
-     *     tags={"UserController"},
+     *     tags={"User"},
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, description="ID do usuário"),
      *     @OA\Response(response=204, description="Usuário removido com sucesso")

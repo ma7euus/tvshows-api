@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserService
 {
@@ -29,7 +30,11 @@ class UserService
      */
     public function findById(string $id): User
     {
-        return User::findOrFail($id);
+        if (!Str::isUuid($id)) {
+            throw (new ModelNotFoundException())->setModel(User::class, [$id]);
+        }
+
+        return User::query()->findOrFail($id);
     }
 
     /**
@@ -64,7 +69,7 @@ class UserService
      */
     public function update(string $id, array $data): User
     {
-        $user = User::findOrFail($id);
+        $user = $this->findById($id);
 
         if (!empty($data['username'])) {
             $existing = User::where('username', $data['username'])
@@ -101,7 +106,7 @@ class UserService
      */
     public function delete(string $id): void
     {
-        User::destroy($id);
+        $this->findById($id)->delete();
     }
 
     /**
@@ -121,6 +126,8 @@ class UserService
         string $sortField = 'id',
         string $sortOrder = 'ASC'
     ): LengthAwarePaginator {
+        $sortOrder = strtoupper($sortOrder) === 'DESC' ? 'DESC' : 'ASC';
+
         return User::where('username', 'ILIKE', "%{$username}%")
             ->orderBy($sortField, $sortOrder)
             ->paginate($size, ['*'], 'page', $page + 1); // Laravel é 1-indexed

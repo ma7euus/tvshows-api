@@ -5,7 +5,7 @@ return [
     'documentations' => [
         'default' => [
             'api' => [
-                'title' => 'CManager API - TV Shows',
+                'title' => 'API - TV Shows',
             ],
             'routes' => [
                 'api' => 'api/documentation',

@@ -15,6 +15,7 @@ class UserControllerTest extends TestCase
     private string $existingId;
     private string $seededUsername;
     private string $adminToken;
+    private string $userToken;
 
     protected function setUp(): void
     {
@@ -29,6 +30,14 @@ class UserControllerTest extends TestCase
         ]);
         $this->existingId = $admin->id;
         $this->adminToken = JWTAuth::fromUser($admin);
+
+        $user = User::create([
+            'username' => 'regular-user',
+            'password' => bcrypt('password'),
+            'role' => Role::USER->value,
+            'enabled' => true,
+        ]);
+        $this->userToken = JWTAuth::fromUser($user);
 
         foreach (['alberto', 'alex', 'bob'] as $name) {
             User::create([
@@ -116,5 +125,35 @@ class UserControllerTest extends TestCase
 
         $response->assertStatus(204);
         $this->assertNull(User::find($this->existingId));
+    }
+
+    public function test_put_without_accept_header_still_returns_json_401(): void
+    {
+        $response = $this->put('/api/users/' . $this->existingId, [
+            'username' => 'seed-updated',
+        ]);
+
+        $response->assertStatus(401)
+            ->assertJsonPath('message', 'Token not provided')
+            ->assertJsonPath('path', '/api/users/' . $this->existingId)
+            ->assertJsonPath('error', 'Unauthorized');
+    }
+
+    public function test_delete_without_accept_header_still_returns_json_401(): void
+    {
+        $response = $this->delete('/api/users/' . $this->existingId);
+
+        $response->assertStatus(401)
+            ->assertJsonPath('message', 'Token not provided')
+            ->assertJsonPath('path', '/api/users/' . $this->existingId)
+            ->assertJsonPath('error', 'Unauthorized');
+    }
+
+    public function test_non_admin_cannot_access_user_routes(): void
+    {
+        $response = $this->withHeader('Authorization', 'Bearer ' . $this->userToken)
+            ->getJson('/api/users');
+
+        $response->assertStatus(403);
     }
 }
