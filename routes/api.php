@@ -44,5 +44,7 @@ Route::middleware(['jwt.auth'])->group(function () {
             ->name('shows.imports.store');
         Route::get('/shows/imports/{import}', [ShowImportController::class, 'show'])
             ->name('shows.imports.show');
+        Route::post('/shows/imports/{import}/resume', [ShowImportController::class, 'resume'])
+            ->name('shows.imports.resume');
     });
 });
