@@ -3,8 +3,8 @@
 namespace App\Modules\Shows\Application\Shows\UseCases;
 
 use App\Modules\Shows\Application\Shows\DTO\ShowSeasonAverageDTO;
-use App\Modules\Shows\Domain\Shows\Contracts\EpisodeRepositoryInterface;
-use App\Modules\Shows\Domain\Shows\Contracts\ShowRepositoryInterface;
+use App\Modules\Shows\Domain\Shows\Contracts\Repositories\EpisodeRepositoryInterface;
+use App\Modules\Shows\Domain\Shows\Contracts\Repositories\ShowRepositoryInterface;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 final class GetShowSeasonAveragesUseCase

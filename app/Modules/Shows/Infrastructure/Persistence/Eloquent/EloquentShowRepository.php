@@ -5,7 +5,7 @@ namespace App\Modules\Shows\Infrastructure\Persistence\Eloquent;
 use App\Models\Show;
 use App\Modules\Shared\Infrastructure\Persistence\Support\PersistenceValueNormalizer;
 use App\Modules\Shows\Application\Shows\DTO\ExternalShowDTO;
-use App\Modules\Shows\Domain\Shows\Contracts\ShowRepositoryInterface;
+use App\Modules\Shows\Domain\Shows\Contracts\Repositories\ShowRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 final class EloquentShowRepository implements ShowRepositoryInterface

@@ -6,7 +6,7 @@ use App\Models\Episode;
 use App\Models\Show;
 use App\Modules\Shared\Infrastructure\Persistence\Support\PersistenceValueNormalizer;
 use App\Modules\Shows\Application\Shows\DTO\SeasonAverageDTO;
-use App\Modules\Shows\Domain\Shows\Contracts\EpisodeRepositoryInterface;
+use App\Modules\Shows\Domain\Shows\Contracts\Repositories\EpisodeRepositoryInterface;
 
 final class EloquentEpisodeRepository implements EpisodeRepositoryInterface
 {

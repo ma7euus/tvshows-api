@@ -2,7 +2,7 @@
 
 namespace App\Modules\Shows\Application\Shows\UseCases;
 
-use App\Modules\Shows\Domain\Shows\Contracts\ShowRepositoryInterface;
+use App\Modules\Shows\Domain\Shows\Contracts\Repositories\ShowRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 final class ListShowsUseCase

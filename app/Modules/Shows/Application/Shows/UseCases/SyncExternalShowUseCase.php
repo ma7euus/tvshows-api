@@ -4,8 +4,8 @@ namespace App\Modules\Shows\Application\Shows\UseCases;
 
 use App\Modules\Shows\Application\Shows\DTO\ExternalShowDTO;
 use App\Modules\Shows\Application\Shows\DTO\ShowSyncResultDTO;
-use App\Modules\Shows\Domain\Shows\Contracts\EpisodeRepositoryInterface;
-use App\Modules\Shows\Domain\Shows\Contracts\ShowRepositoryInterface;
+use App\Modules\Shows\Domain\Shows\Contracts\Repositories\EpisodeRepositoryInterface;
+use App\Modules\Shows\Domain\Shows\Contracts\Repositories\ShowRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
 final class SyncExternalShowUseCase

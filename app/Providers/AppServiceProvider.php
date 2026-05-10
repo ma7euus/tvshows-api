@@ -4,9 +4,9 @@ namespace App\Providers;
 
 use App\Modules\Shared\Domain\Security\Contracts\RoleAuthorizerInterface;
 use App\Modules\Shared\Infrastructure\Security\RolePermissionService;
-use App\Modules\Shows\Domain\Shows\Contracts\EpisodeRepositoryInterface;
+use App\Modules\Shows\Domain\Shows\Contracts\Repositories\EpisodeRepositoryInterface;
+use App\Modules\Shows\Domain\Shows\Contracts\Repositories\ShowRepositoryInterface;
 use App\Modules\Shows\Domain\Shows\Contracts\ShowCatalogInterface;
-use App\Modules\Shows\Domain\Shows\Contracts\ShowRepositoryInterface;
 use App\Modules\Shows\Infrastructure\Integration\Client\AbstractRequest;
 use App\Modules\Shows\Infrastructure\Integration\Client\RequestService;
 use App\Modules\Shows\Infrastructure\Persistence\Eloquent\EloquentEpisodeRepository;

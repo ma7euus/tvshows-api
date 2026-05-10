@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Shows\Domain\Shows\Contracts;
+namespace App\Modules\Shows\Domain\Shows\Contracts\Repositories;
 
 use App\Models\Show;
 use App\Modules\Shows\Application\Shows\DTO\ExternalShowDTO;

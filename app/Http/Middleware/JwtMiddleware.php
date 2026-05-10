@@ -25,7 +25,7 @@ class JwtMiddleware
         } catch (TokenInvalidException $e) {
             throw new AuthenticationException('Token invalid.');
         } catch (JWTException $e) {
-            throw new AuthenticationException('Token not provided.');
+            throw new AuthenticationException('Token not provided');
         }
 
         return $next($request);
