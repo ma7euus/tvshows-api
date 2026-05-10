@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Enums\TvMazeImportStatus;
 use App\Models\TvMazeImport;
+use App\Modules\Shows\Application\Shows\Exceptions\ShowWithoutEpisodesException;
 use App\Modules\Shows\Application\Shows\UseCases\SyncExternalShowUseCase;
 use App\Modules\Shows\Domain\Shows\Contracts\ShowCatalogInterface;
 use App\Modules\Shows\Infrastructure\Integration\Exceptions\TransientTvMazeException;
@@ -77,14 +78,21 @@ class ImportTvMazeShowsPageJob implements ShouldQueue
                 return;
             }
 
+            $importedShows = 0;
+
             foreach ($shows as $showReference) {
-                $syncExternalShowUseCase->execute(
-                    $showCatalog->getShowByIntegrationId($showReference->integrationId),
-                );
+                try {
+                    $syncExternalShowUseCase->execute(
+                        $showCatalog->getShowByIntegrationId($showReference->integrationId),
+                    );
+                    $importedShows++;
+                } catch (ShowWithoutEpisodesException) {
+                    continue;
+                }
             }
 
             $import->increment('processed_pages');
-            $import->increment('processed_shows', count($shows));
+            $import->increment('processed_shows', $importedShows);
             $import->forceFill([
                 'current_page' => $this->page,
             ])->save();
