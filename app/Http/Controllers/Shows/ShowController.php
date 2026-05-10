@@ -32,6 +32,7 @@ class ShowController extends Controller
      *     @OA\Response(response=201, description="Show sincronizado com sucesso", @OA\JsonContent(ref="#/components/schemas/ShowDTO")),
      *     @OA\Response(response=200, description="Show já existente atualizado", @OA\JsonContent(ref="#/components/schemas/ShowDTO")),
      *     @OA\Response(response=403, description="Acesso negado"),
+     *     @OA\Response(response=422, description="Show sem episódios disponíveis para importação"),
      *     @OA\Response(response=404, description="Show não encontrado na API externa")
      * )
      */

@@ -140,6 +140,60 @@ class ImportTvMazeShowsPageJobTest extends TestCase
         Queue::assertNothingPushed();
     }
 
+    public function test_job_skips_shows_without_episodes_without_failing_import(): void
+    {
+        Queue::fake();
+
+        $import = TvMazeImport::query()->create([
+            'status' => TvMazeImportStatus::PENDING,
+        ]);
+
+        $catalog = Mockery::mock(ShowCatalogInterface::class);
+        $catalog->shouldReceive('getShowReferencesPage')
+            ->once()
+            ->with(0)
+            ->andReturn([
+                new ShowReferenceDTO(400, 'No Episodes Show'),
+                new ShowReferenceDTO(500, 'Imported Show'),
+            ]);
+        $catalog->shouldReceive('getShowByIntegrationId')
+            ->once()
+            ->with(400)
+            ->andReturn(new ExternalShowDTO(
+                integrationId: 400,
+                name: 'No Episodes Show',
+                type: 'Scripted',
+                language: 'English',
+                status: 'Running',
+                runtime: 60,
+                averageRuntime: 58,
+                officialSite: 'https://example.com/no-episodes-show',
+                rating: 7.2,
+                summary: 'No episodes available.',
+                episodes: [],
+            ));
+        $catalog->shouldReceive('getShowByIntegrationId')
+            ->once()
+            ->with(500)
+            ->andReturn($this->externalShowData(500, 'Imported Show', 5001));
+
+        $job = new ImportTvMazeShowsPageJob($import->id, 0);
+        $job->handle($catalog, $this->app->make(SyncExternalShowUseCase::class));
+
+        $import->refresh();
+
+        $this->assertSame(TvMazeImportStatus::RUNNING, $import->status);
+        $this->assertSame(1, $import->processed_pages);
+        $this->assertSame(1, $import->processed_shows);
+        $this->assertSame(1, Show::query()->count());
+        $this->assertSame(1, Episode::query()->count());
+        $this->assertNull(Show::query()->where('id_integration', 400)->first());
+
+        Queue::assertPushed(ImportTvMazeShowsPageJob::class, function (ImportTvMazeShowsPageJob $nextJob) use ($import) {
+            return $nextJob->importId === $import->id && $nextJob->page === 1;
+        });
+    }
+
     public function test_job_rethrows_transient_tvmaze_exception_for_queue_retry(): void
     {
         Queue::fake();

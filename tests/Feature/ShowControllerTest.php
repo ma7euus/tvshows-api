@@ -103,7 +103,21 @@ class ShowControllerTest extends TestCase
                 officialSite: '',
                 rating: 7.4,
                 summary: '   ',
-                episodes: [],
+                episodes: [
+                    new ExternalEpisodeDTO(
+                        integrationId: 1011,
+                        name: 'Blank Show Episode',
+                        season: 1,
+                        number: 1,
+                        type: 'regular',
+                        airdate: '2024-01-01',
+                        airtime: '21:00',
+                        airstamp: '2024-01-01T21:00:00+00:00',
+                        runtime: 30,
+                        rating: 7.0,
+                        summary: 'Episode summary',
+                    ),
+                ],
             ));
 
         $this->app->instance(ShowCatalogInterface::class, $catalog);
@@ -126,6 +140,38 @@ class ShowControllerTest extends TestCase
         $this->assertNull($show->status);
         $this->assertNull($show->official_site);
         $this->assertNull($show->summary);
+    }
+
+    public function test_admin_cannot_sync_show_without_episodes(): void
+    {
+        $catalog = Mockery::mock(ShowCatalogInterface::class);
+        $catalog->shouldReceive('getShow')
+            ->once()
+            ->with('No Episodes Show')
+            ->andReturn(new ExternalShowDTO(
+                integrationId: 102,
+                name: 'No Episodes Show',
+                type: 'Scripted',
+                language: 'English',
+                status: 'Running',
+                runtime: 30,
+                averageRuntime: 30,
+                officialSite: 'https://example.com/no-episodes-show',
+                rating: 7.4,
+                summary: 'No episodes available.',
+                episodes: [],
+            ));
+
+        $this->app->instance(ShowCatalogInterface::class, $catalog);
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $this->adminToken)
+            ->postJson('/api/shows', ['name' => 'No Episodes Show']);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('message', 'No episodes available for the selected show.');
+
+        $this->assertNull(Show::query()->where('id_integration', 102)->first());
+        $this->assertSame(0, Episode::query()->count());
     }
 
     public function test_list_shows_returns_paginated_items(): void
