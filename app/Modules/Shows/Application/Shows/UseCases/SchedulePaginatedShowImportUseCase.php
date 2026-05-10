@@ -7,7 +7,7 @@ use App\Jobs\ImportTvMazeShowsPageJob;
 use App\Models\TvMazeImport;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
-final class SchedulePaginatedShowImportUseCase
+class SchedulePaginatedShowImportUseCase
 {
     public function execute(): TvMazeImport
     {

@@ -8,7 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 final class ListShowsUseCase
 {
     public function __construct(
-        private readonly ShowRepositoryInterface $showRepository,
+        protected readonly ShowRepositoryInterface $showRepository,
     ) {}
 
     public function execute(

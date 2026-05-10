@@ -18,8 +18,8 @@ use Illuminate\Http\JsonResponse;
 class ShowController extends Controller
 {
     public function __construct(
-        private readonly SyncShowUseCase $syncShowUseCase,
-        private readonly ListShowsUseCase $listShowsUseCase,
+        protected readonly SyncShowUseCase $syncShowUseCase,
+        protected readonly ListShowsUseCase $listShowsUseCase,
     ) {}
 
     /**
