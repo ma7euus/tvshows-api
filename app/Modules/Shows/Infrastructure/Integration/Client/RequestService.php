@@ -2,6 +2,7 @@
 
 namespace App\Modules\Shows\Infrastructure\Integration\Client;
 
+use App\Modules\Shared\Infrastructure\Support\Config;
 use App\Modules\Shows\Application\Shows\DTO\ExternalEpisodeDTO;
 use App\Modules\Shows\Application\Shows\DTO\ExternalShowDTO;
 use App\Modules\Shows\Application\Shows\DTO\ShowReferenceDTO;
@@ -11,39 +12,31 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class RequestService implements ShowCatalogInterface
 {
-    private const SEARCH_URL = 'https://api.tvmaze.com/singlesearch/shows?q=%s&embed=episodes';
-    private const SHOW_BY_ID_URL = 'https://api.tvmaze.com/shows/%d?embed=episodes';
-    private const SHOW_INDEX_URL = 'https://api.tvmaze.com/shows?page=%d';
 
-    private AbstractRequest $abstractRequest;
-
-    public function __construct(AbstractRequest $abstractRequest)
+    public function __construct(
+        protected AbstractRequest $abstractRequest,
+        protected Config          $config
+    )
     {
-        $this->abstractRequest = $abstractRequest;
     }
 
     public function getShow(string $showName): ExternalShowDTO
     {
-        $url = sprintf(self::SEARCH_URL, urlencode($showName));
-
         return $this->mapExternalShow(
-            ShowsRequestDTO::fromArray($this->abstractRequest->getShow($url)),
+            ShowsRequestDTO::fromArray($this->abstractRequest->getShowByName($showName)),
         );
     }
 
     public function getShowByIntegrationId(int $showIntegrationId): ExternalShowDTO
     {
-        $url = sprintf(self::SHOW_BY_ID_URL, $showIntegrationId);
-
         return $this->mapExternalShow(
-            ShowsRequestDTO::fromArray($this->abstractRequest->getShow($url)),
+            ShowsRequestDTO::fromArray($this->abstractRequest->getShowByIntegrationId($showIntegrationId)),
         );
     }
 
     public function getShowReferencesPage(int $page): array
     {
-        $url = sprintf(self::SHOW_INDEX_URL, $page);
-
+        $path = sprintf("%s/shows", $this->config->get('tvmaze.client.api.base_path'));
         return array_values(array_filter(array_map(function (array $show): ?ShowReferenceDTO {
             $dto = ShowsRequestDTO::fromArray($show);
 
@@ -55,7 +48,9 @@ class RequestService implements ShowCatalogInterface
                 integrationId: $dto->id,
                 name: $dto->name,
             );
-        }, $this->abstractRequest->getCollection($url, true))));
+        }, $this->abstractRequest->getCollection($path, ['query' => [
+            'page' => $page,
+        ]], true))));
     }
 
     private function mapExternalShow(ShowsRequestDTO $dto): ExternalShowDTO
@@ -76,7 +71,7 @@ class RequestService implements ShowCatalogInterface
             rating: $dto->rating?->average,
             summary: $dto->summary,
             episodes: array_values(array_filter(array_map(
-                static fn ($episode) => $episode->id === null ? null : new ExternalEpisodeDTO(
+                static fn($episode) => $episode->id === null ? null : new ExternalEpisodeDTO(
                     integrationId: $episode->id,
                     name: $episode->name,
                     season: $episode->season,
