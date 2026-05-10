@@ -2,29 +2,52 @@
 
 namespace App\Modules\Shows\Infrastructure\Integration\Client;
 
+use App\Modules\Shared\Infrastructure\Support\Config;
 use App\Modules\Shows\Infrastructure\Integration\Exceptions\TvMazeRateLimitException;
 use App\Modules\Shows\Infrastructure\Integration\Exceptions\TvMazeServiceUnavailableException;
 use App\Modules\Shows\Infrastructure\Integration\Exceptions\TvMazeTransportException;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\TransferStats;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AbstractRequest
 {
-    public function __construct(
-        private readonly ClientInterface $client,
-    ) {}
+    protected string $fullUri;
 
-    public function getShow(string $url): array
+    public function __construct(
+        protected readonly ClientInterface $client,
+        protected readonly Config          $config,
+    )
     {
-        return $this->requestJson($url);
     }
 
-    public function getCollection(string $url, bool $allowNotFound = false): array
+    public function getShowByName(string $name): array
+    {
+        $path = sprintf("%s/singlesearch/shows", $this->config->get('tvmaze.client.api.base_path'));
+        return $this->requestJson($path, [
+            'query' => [
+                'q' => $name,
+                'embed' => 'episodes'
+            ]
+        ]);
+    }
+
+    public function getShowByIntegrationId(int $showIntegrationId): array
+    {
+        $path = sprintf("%s/shows/%d", $this->config->get('tvmaze.client.api.base_path'), $showIntegrationId);
+        return $this->requestJson($path, [
+            'query' => [
+                'embed' => 'episodes'
+            ]
+        ]);
+    }
+
+    public function getCollection(string $path, array $options = [], bool $allowNotFound = false): array
     {
         return $this->mapCollectionPayload(
-            $this->requestJson($url, $allowNotFound),
+            $this->requestJson($path, $options, $allowNotFound),
         );
     }
 
@@ -41,12 +64,13 @@ class AbstractRequest
         return $payload;
     }
 
-    private function requestJson(string $url, bool $allowNotFound = false): ?array
+    private function requestJson(string $path, array $options = [], bool $allowNotFound = false): ?array
     {
         try {
-            $response = $this->client->request('GET', $url, [
-                'http_errors' => false,
+            $options = array_merge($options, [
+                'on_stats' => $this->buildOnStatsCallback()
             ]);
+            $response = $this->client->request('GET', $path, $options);
         } catch (GuzzleException $exception) {
             throw new TvMazeTransportException(previous: $exception);
         }
@@ -73,12 +97,19 @@ class AbstractRequest
             throw new HttpException(502, 'TVMaze returned an unexpected response.');
         }
 
-        $payload = json_decode((string) $response->getBody(), true);
+        $payload = json_decode((string)$response->getBody(), true);
 
         if (!is_array($payload)) {
             throw new HttpException(502, 'TVMaze returned an invalid payload.');
         }
 
         return $payload;
+    }
+
+    protected function buildOnStatsCallback(): \Closure
+    {
+        return function (TransferStats $transferStats) {
+            $this->fullUri = $transferStats->getEffectiveUri();
+        };
     }
 }

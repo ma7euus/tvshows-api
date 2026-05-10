@@ -31,6 +31,7 @@ class EpisodeController extends Controller
     public function average(EpisodeAverageRequest $request): JsonResponse
     {
         $result = $this->getShowSeasonAveragesUseCase->execute($request->validated('showId'));
+        //$result = $this->getShowSeasonAveragesUseCase->calculate($request->validated('showId'));
 
         return response()->json(new ShowAverageResource($result));
     }

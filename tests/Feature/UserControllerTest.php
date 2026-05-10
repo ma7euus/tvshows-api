@@ -127,6 +127,28 @@ class UserControllerTest extends TestCase
         $this->assertNull(User::find($this->existingId));
     }
 
+    public function test_put_without_accept_header_still_returns_json_401(): void
+    {
+        $response = $this->put('/api/users/' . $this->existingId, [
+            'username' => 'seed-updated',
+        ]);
+
+        $response->assertStatus(401)
+            ->assertJsonPath('message', 'Token not provided')
+            ->assertJsonPath('path', '/api/users/' . $this->existingId)
+            ->assertJsonPath('error', 'Unauthorized');
+    }
+
+    public function test_delete_without_accept_header_still_returns_json_401(): void
+    {
+        $response = $this->delete('/api/users/' . $this->existingId);
+
+        $response->assertStatus(401)
+            ->assertJsonPath('message', 'Token not provided')
+            ->assertJsonPath('path', '/api/users/' . $this->existingId)
+            ->assertJsonPath('error', 'Unauthorized');
+    }
+
     public function test_non_admin_cannot_access_user_routes(): void
     {
         $response = $this->withHeader('Authorization', 'Bearer ' . $this->userToken)
