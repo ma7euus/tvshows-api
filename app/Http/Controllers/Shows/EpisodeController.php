@@ -14,7 +14,7 @@ use Illuminate\Http\JsonResponse;
 class EpisodeController extends Controller
 {
     public function __construct(
-        private readonly GetShowSeasonAveragesUseCase $getShowSeasonAveragesUseCase,
+        protected readonly GetShowSeasonAveragesUseCase $getShowSeasonAveragesUseCase,
     ) {}
 
     /**

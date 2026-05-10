@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\DB;
 final class SyncExternalShowUseCase
 {
     public function __construct(
-        private readonly ShowRepositoryInterface $showRepository,
-        private readonly EpisodeRepositoryInterface $episodeRepository,
+        protected readonly ShowRepositoryInterface $showRepository,
+        protected readonly EpisodeRepositoryInterface $episodeRepository,
     ) {}
 
     public function execute(ExternalShowDTO $externalShow): ShowSyncResultDTO

@@ -8,13 +8,16 @@ use App\Modules\Shows\Application\Shows\DTO\ExternalShowDTO;
 use App\Modules\Shows\Domain\Shows\Contracts\Repositories\ShowRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-final class EloquentShowRepository implements ShowRepositoryInterface
+class EloquentShowRepository implements ShowRepositoryInterface
 {
     public function __construct(
-        private readonly PersistenceValueNormalizer $valueNormalizer,
-    ) {}
+        protected Show                                $showModel,
+        protected readonly PersistenceValueNormalizer $valueNormalizer,
+    )
+    {
+    }
 
-    private const SORTABLE_FIELDS = [
+    protected const array SORTABLE_FIELDS = [
         'id',
         'id_integration',
         'name',
@@ -29,12 +32,12 @@ final class EloquentShowRepository implements ShowRepositoryInterface
 
     public function findById(string $id): Show
     {
-        return Show::query()->findOrFail($id);
+        return $this->showModel->newInstance()->query()->findOrFail($id);
     }
 
     public function upsertFromExternalShow(ExternalShowDTO $showData): Show
     {
-        return Show::query()->updateOrCreate(
+        return $this->showModel->newInstance()->updateOrCreate(
             ['id_integration' => $showData->integrationId],
             [
                 'name' => $this->valueNormalizer->nullableString($showData->name),
@@ -52,17 +55,18 @@ final class EloquentShowRepository implements ShowRepositoryInterface
 
     public function paginateByName(
         string $name,
-        int $page,
-        int $size,
+        int    $page,
+        int    $size,
         string $sortField,
         string $sortOrder,
-    ): LengthAwarePaginator {
+    ): LengthAwarePaginator
+    {
         $sortField = in_array($sortField, self::SORTABLE_FIELDS, true) ? $sortField : 'name';
         $sortOrder = strtoupper($sortOrder) === 'DESC' ? 'DESC' : 'ASC';
 
-        return Show::query()
+        return $this->showModel->newInstance()
             ->withCount('episodes')
-            ->when($name !== '', fn ($query) => $query->where('name', 'ILIKE', "%{$name}%"))
+            ->when($name !== '', fn($query) => $query->where('name', 'ILIKE', "%{$name}%"))
             ->orderBy($sortField, $sortOrder)
             ->paginate($size, ['*'], 'page', $page + 1);
     }
