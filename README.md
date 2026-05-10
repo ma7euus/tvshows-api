@@ -1,7 +1,7 @@
 ## Como executar
 
 ```bash
-./docker/init.sh
+./.docker/init.sh
 ```
 
 A aplicação estará disponível em `http://localhost:9012`
@@ -20,7 +20,7 @@ Na primeira subida o container da aplicação faz automaticamente:
 ## Fluxo mínimo:
 
 ```bash
-./docker/init.sh
+./.docker/init.sh
 docker compose logs -f app
 ```
 

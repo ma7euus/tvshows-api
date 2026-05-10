@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Shows;
 
-
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TvMazeImportResource;
 use App\Models\TvMazeImport;
+use App\Modules\Shows\Application\Shows\UseCases\ResumePaginatedShowImportUseCase;
 use App\Modules\Shows\Application\Shows\UseCases\SchedulePaginatedShowImportUseCase;
 use Illuminate\Http\JsonResponse;
 
@@ -16,6 +16,7 @@ class ShowImportController extends Controller
 {
     public function __construct(
         protected readonly SchedulePaginatedShowImportUseCase $schedulePaginatedShowImportUseCase,
+        protected readonly ResumePaginatedShowImportUseCase $resumePaginatedShowImportUseCase,
     ) {}
 
     /**
@@ -51,5 +52,25 @@ class ShowImportController extends Controller
     public function show(TvMazeImport $import): JsonResponse
     {
         return response()->json(new TvMazeImportResource($import));
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/shows/imports/{id}/resume",
+     *     summary="Retoma uma importação paginada da TVMaze que falhou",
+     *     tags={"Show Imports"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Id da importação", @OA\Schema(type="string", format="uuid")),
+     *     @OA\Response(response=202, description="Importação retomada", @OA\JsonContent(ref="#/components/schemas/TvMazeImportDTO")),
+     *     @OA\Response(response=403, description="Acesso negado"),
+     *     @OA\Response(response=404, description="Importação não encontrada", @OA\JsonContent(ref="#/components/schemas/ApiError")),
+     *     @OA\Response(response=409, description="Importação não pode ser retomada no estado atual", @OA\JsonContent(ref="#/components/schemas/ApiError"))
+     * )
+     */
+    public function resume(TvMazeImport $import): JsonResponse
+    {
+        $import = $this->resumePaginatedShowImportUseCase->execute($import);
+
+        return response()->json(new TvMazeImportResource($import), 202);
     }
 }
