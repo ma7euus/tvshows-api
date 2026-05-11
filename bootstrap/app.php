@@ -12,7 +12,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'jwt.auth' => \App\Http\Middleware\JwtMiddleware::class,
+            'jwt.enabled' => \App\Http\Middleware\EnsureEnabledApiUser::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
     })

@@ -21,7 +21,7 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 | Rotas protegidas (requerem JWT)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['jwt.auth'])->group(function () {
+Route::middleware(['jwt.auth', 'jwt.enabled'])->group(function () {
 
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::post('/users', [UserController::class, 'store']);
