@@ -10,11 +10,6 @@ return new class extends Migration
     {
         Schema::table('shows', function (Blueprint $table) {
             $table->index('name', 'shows_name_lookup_index');
-            $table->index('id_integration', 'shows_id_integration_lookup_index');
-        });
-
-        Schema::table('episodes', function (Blueprint $table) {
-            $table->index('id_integration', 'episodes_id_integration_lookup_index');
         });
     }
 
@@ -22,11 +17,6 @@ return new class extends Migration
     {
         Schema::table('shows', function (Blueprint $table) {
             $table->dropIndex('shows_name_lookup_index');
-            $table->dropIndex('shows_id_integration_lookup_index');
-        });
-
-        Schema::table('episodes', function (Blueprint $table) {
-            $table->dropIndex('episodes_id_integration_lookup_index');
         });
     }
 };
