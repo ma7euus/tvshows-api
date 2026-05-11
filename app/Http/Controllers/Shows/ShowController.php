@@ -52,8 +52,24 @@ class ShowController extends Controller
      *     @OA\Parameter(name="name", in="query", required=false, description="Filtro por nome"),
      *     @OA\Parameter(name="page", in="query", required=false, description="Número da página, iniciando em 0"),
      *     @OA\Parameter(name="size", in="query", required=false, description="Quantidade por página"),
-     *     @OA\Parameter(name="sortField", in="query", required=false, description="Campo de ordenação"),
-     *     @OA\Parameter(name="sortOrder", in="query", required=false, description="ASC ou DESC"),
+     *     @OA\Parameter(
+     *         name="sortField",
+     *         in="query",
+     *         required=false,
+     *         description="Campo de ordenação",
+     *         @OA\Schema(
+     *             type="string",
+     *             default="name",
+     *             enum={"id","id_integration","name","language","status","runtime","average_runtime","rating","created_at","updated_at"}
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="sortOrder",
+     *         in="query",
+     *         required=false,
+     *         description="Direção da ordenação",
+     *         @OA\Schema(type="string", default="ASC", enum={"ASC","DESC"})
+     *     ),
      *     @OA\Response(response=200, description="Listagem realizada com sucesso")
      * )
      */

@@ -31,8 +31,24 @@ class UserController extends Controller
      *     @OA\Parameter(name="username", in="query", required=false, description="Nome do usuário para filtro"),
      *     @OA\Parameter(name="page", in="query", required=false, description="Número da página (inicia em 0)"),
      *     @OA\Parameter(name="size", in="query", required=false, description="Quantidade de registros por página"),
-     *     @OA\Parameter(name="sortField", in="query", required=false, description="Campo para ordenação"),
-     *     @OA\Parameter(name="sortOrder", in="query", required=false, description="Direção da ordenação (ASC ou DESC)"),
+     *     @OA\Parameter(
+     *         name="sortField",
+     *         in="query",
+     *         required=false,
+     *         description="Campo para ordenação",
+     *         @OA\Schema(
+     *             type="string",
+     *             default="id",
+     *             enum={"id","username","role","enabled","created_at","updated_at"}
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="sortOrder",
+     *         in="query",
+     *         required=false,
+     *         description="Direção da ordenação",
+     *         @OA\Schema(type="string", default="ASC", enum={"ASC","DESC"})
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Listagem realizada com sucesso",
