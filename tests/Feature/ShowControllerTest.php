@@ -86,6 +86,24 @@ class ShowControllerTest extends TestCase
         $response->assertStatus(403);
     }
 
+    public function test_disabled_user_with_valid_token_cannot_access_protected_show_route(): void
+    {
+        $disabledUser = User::create([
+            'username' => 'disabled-show-user',
+            'password' => bcrypt('password'),
+            'role' => Role::USER->value,
+            'enabled' => false,
+        ]);
+
+        $disabledToken = JWTAuth::fromUser($disabledUser);
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $disabledToken)
+            ->getJson('/api/shows');
+
+        $response->assertStatus(401)
+            ->assertJsonPath('message', 'User not found or disabled.');
+    }
+
     public function test_admin_sync_normalizes_blank_optional_show_fields(): void
     {
         $catalog = Mockery::mock(ShowCatalogInterface::class);
